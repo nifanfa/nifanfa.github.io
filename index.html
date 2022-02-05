@@ -63,7 +63,7 @@ window.onload = (async () => {
   var t, e = await fetch("https://api.github.com/users/nifanfa/repos", {
     mode: "cors",
     headers: {
-      Authorization: btoa("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")
+      Authorization: atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")
     }
   }).then(t => t.json());
   for (const n of e) {
@@ -71,7 +71,7 @@ window.onload = (async () => {
       o = await fetch("https://api.github.com/repos/" + n.full_name + "/contents", {
         mode: "cors",
         headers: {
-          Authorization: btoa("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")
+          Authorization: atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")
         }
       }).then(t => t.json());
     for (const t of o) "file" == t.type && t.name.endsWith(".png") && a.push(t.download_url);
