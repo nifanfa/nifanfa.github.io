@@ -1,12 +1,7 @@
 <!DOCTYPE HTML>
-<!--
-	Story by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 	<head>
-		<title>nifanfa</title>
+		<title>Nifanfa's Website</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -21,30 +16,19 @@
 					<section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
 						<div class="content">
 							<h1>nifanfa</h1>
-							<p class="major">Hello! I'm nifanfa a OS dever from China</a>.</p>
+							<p class="major">Hello! I'm nifanfa, an OS developer from China.</p>
 							<p class="major">你好，我是来自中国的操作系统开发者</a>.</p>
 							<ul class="actions stacked">
-								<li><a href="#first" class="button big wide smooth-scroll-middle">Get Started</a></li>
+								<li><a href="#projects" class="button big wide smooth-scroll-middle">My Projects</a></li>
 							</ul>
 						</div>
 						<div class="image">
-							<img src="images/abanner.png" alt="" />
+							<img src="https://github.com/nifanfa.png" alt="" />
 						</div>
 					</section>
 
 				<!-- Two -->
-					<section class="spotlight style1 orient-right content-align-left image-position-center onscroll-image-fade-in" id="first">
-						<div class="content">
-							<h2>OS dev using Native AOT in Visual Studio 2022</h2>
-							<p>It support basic things like Paging, GDT, IDT and it also support network! IPv4, UDP, TCP. there's even a Nintendo Family Computer Emulator!</p>
-							<ul class="actions stacked">
-								<li><a href="https://github.com/nifanfa/Solution1" class="button">Learn More</a></li>
-							</ul>
-						</div>
-						<div class="image">
-							<img src="https://github.com/nifanfa/Solution1/blob/master/Screenshot.png?raw=true" alt="" />
-						</div>
-					</section>
+					<span id="under"></span>
 
 				<!-- Footer -->
 					<footer class="wrapper style1 align-center">
@@ -52,7 +36,7 @@
 							<ul class="icons">
 								<li><a href="mailto:nifanfa@foxmail.com" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
 							</ul>
-							<p>&copy; Untitled. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+							<p>&copy; 2022 Nifanfa.</p>
 						</div>
 					</footer>
 
@@ -66,6 +50,6 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-
+			<script>var getRandomGradientBlob=async()=>{var t=document.createElement("canvas"),e=t.getContext("2d");e.rect(0,0,t.width,t.height);var a=e.createLinearGradient(0,0,t.width,t.height);return a.addColorStop(0,`#${(16777215*Math.random()<<0).toString(16).padStart(6,"0")}`),a.addColorStop(1,`#${(16777215*Math.random()<<0).toString(16).padStart(6,"0")}`),e.fillStyle=a,e.fill(),URL.createObjectURL(await new Promise(e=>t.toBlob(t=>e(t))))};window.onload=(async()=>{var t,e=await fetch("https://api.github.com/users/nifanfa/repos",{mode:"cors",headers:{Authorization:"token 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"}}).then(t=>t.json());for(const n of e){var a=[],o=await fetch("https://api.github.com/repos/"+n.full_name+"/contents",{mode:"cors",headers:{Authorization:"token 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"}}).then(t=>t.json());for(const t of o)"file"==t.type&&t.name.endsWith(".png")&&a.push(t.download_url);$("#under").after(`<section class="spotlight style1 orient-${t?"left":"right"} content-align-${t?"left":"right"} image-position-center onscroll-image-fade-in" id="projects"><div class="content"><h2>${n.name}</h2><p>${n.description||""}</p><ul class="actions stacked"><li><a href="${n.html_url}" class="button">Learn More</a></li></ul></div><div class="image"><img src="${a[0]||await getRandomGradientBlob()}" alt="" /></div></section>`),t=!t}});</script>
 	</body>
 </html>
