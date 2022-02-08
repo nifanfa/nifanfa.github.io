@@ -64,6 +64,11 @@
 				};
 				window.onload=(async()=>
 				{
+					document.addEventListener("DOMContentLoaded", function(event) {
+   						document.querySelectorAll('img').forEach(function(img){
+  						img.onerror = function(){this.style.display='none';};
+   						})
+					});
 					var counter;
 					var a=await fetch("https://api.github.com/users/nifanfa/repos",{mode:"cors",headers:{Authorization:atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")}}).then(t=>t.json());
 					counter =0;
