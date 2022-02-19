@@ -21,9 +21,9 @@
 					<section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
 						<div class="content">
 							<h1>NIFANFA</h1>
-							<p class="major">Hello! a OS dever from China. follow me on <a href="https://github.com/nifanfa">Github</a>! Also my <a href="https://www.youtube.com/channel/UCRc7JKU7JzMJUPiRMK84XhQ">Youtube</a> and my <a href="https://discord.gg/WrNEsmUmKa">discord server</a>!</p>
+							<p class="major">Hello! a OS developer from China. Follow me on my <a href="https://github.com/nifanfa">Github</a>! Also, follow me on my <a href="https://www.youtube.com/channel/UCRc7JKU7JzMJUPiRMK84XhQ">YouTube</a> and my <a href="https://discord.gg/WrNEsmUmKa">Discord server</a>!</p>
 							<ul class="actions stacked">
-								<li><a href="#0" class="button big wide smooth-scroll-middle">Take a loot of my Projects</a></li>
+								<li><a href="#0" class="button big wide smooth-scroll-middle">Take a look at my Projects</a></li>
 							</ul>
 						</div>
 						<div class="image">
@@ -36,7 +36,7 @@
 					<footer class="wrapper style1 align-center">
 						<div class="inner">
 							<ul class="icons">
-								<li><a href="mailto:nifanfa@foxmail.com" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
+								<li><a id="_hiddenEmail" class="icon style2 fa-envelope"><span class="label">Email</span></a></li>
 							</ul>
 							<p>&copy; 2022 Nifanfa and Elijah629. Design: <a href="https://html5up.net">HTML5 UP</p>
 						</div>
@@ -52,59 +52,6 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-			<script>
-				var getRandomGradientBlob=async()=>
-				{
-					var t=document.createElement("canvas"),a=t.getContext("2d");
-					t.height*=4;
-					t.width*=4;
-					a.rect(0,0,t.width,t.height);
-					var e=a.createLinearGradient(0,0,t.width,t.height);
-					return e.addColorStop(0,`#${(16777215*Math.random()<<0).toString(16).padStart(6,"0")}`),e.addColorStop(1,`#${(16777215*Math.random()<<0).toString(16).padStart(6,"0")}`),a.fillStyle=e,a.fill(),URL.createObjectURL(await new Promise(a=>t.toBlob(t=>a(t))))
-				};
-				window.onload=(async()=>
-				{
-					document.addEventListener("DOMContentLoaded", function(event) {
-   						document.querySelectorAll('img').forEach(function(img){
-  						img.onerror = function(){this.style.display='none';};
-   						})
-					});
-					var counter;
-					var a=await fetch("https://api.github.com/users/nifanfa/repos",{mode:"cors",headers:{Authorization:atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")}}).then(t=>t.json());
-					counter =0;
-					for(var e = a.length-1;e>=0;e--)
-					{
-						var t = null;
-						var o=null;
-						var i=await fetch("https://api.github.com/repos/"+a[e].full_name+"/contents",{mode:"cors",headers:{Authorization:atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")}}).then(t=>t.json());
-						for(const t of i)
-						{
-							if(!t.name.endsWith(".png"))continue;
-							(o=t.download_url);a[e].image=o
-						}
-						
-						if(a[e].image!=null)
-						{
-							$("#under").before
-							(`
-							<section class="spotlight style1 ${(counter % 2)==0?"orient-left":"orient-right"} content-align-left image-position-center onscroll-image-fade-in" id="${counter}">
-								<div class="content">
-									<h2 style="background: url(${await getRandomGradientBlob()}) no-repeat;-webkit-background-clip: text;-webkit-text-fill-color: transparent;">${a[e].name}</h2>
-									<p>${a[e].description||""}</p>
-									<ul class="actions stacked">
-										<li><a href="${a[e].html_url}" class="button">Learn More</a></li>
-									</ul>
-								</div>
-								<div class="image">
-								<img style="object-fit: scale-down;background-color: white;" src="${a[e].image}" alt="" />
-								</div>
-							</section>
-							`);
-							counter++;
-						}
-					}
-				});
-			</script>
-
+			<script>window.onload=(async()=>{var t;document.addEventListener("DOMContentLoaded",function(t){document.querySelectorAll("img").forEach(function(t){t.onerror=function(){this.style.display="none"}})});var n=await fetch("https://api.github.com/users/nifanfa/repos",{mode:"cors",headers:{Authorization:atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")}}).then(t=>t.json());t=0;for(var e=n.length-1;e>=0;e--){var o=null,a=await fetch("https://api.github.com/repos/"+n[e].full_name+"/contents",{mode:"cors",headers:{Authorization:atob("dG9rZW4gZ2hwXzg3TFFXMXBCTlV4WHBwWHY4bHlIMW42aFdySVdYbTBkMExjUA==")}}).then(t=>t.json());for(const t of a)t.name.endsWith(".png")&&(o=t.download_url,n[e].image=o);null!=n[e].image&&($("#under").after(`<section class="spotlight style1 ${t%2==0?"orient-left":"orient-right"} content-align-left image-position-center onscroll-image-fade-in" id="${t}"><div class="content">t<h2 style="background: url(${await getRandomGradientBlob()}) no-repeat;-webkit-background-clip: text;-webkit-text-fill-color: transparent;">${n[e].name}</h2><p>${n[e].description||""}</p><ul class="actions stacked"><li><a href="${n[e].html_url}" class="button">Learn More</a></li></ul></div><div class="image"><img style="object-fit: scale-down;background-color: white;" src="${n[e].image}" alt="" /></div></section>`),t++)}});</script>
 	</body>
 </html>
