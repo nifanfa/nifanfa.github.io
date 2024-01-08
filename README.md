@@ -1,5 +1,5 @@
 ## 👋🏻 欢迎！(Welcome!)
-这是倪繁发的网站 (This is nifanfa's website)  
+这是nifanfa的网站 (This is nifanfa's website)  
 
 ## 📚 项目 (Projects)
 我最牛批的项目(One of my best work) introducing
