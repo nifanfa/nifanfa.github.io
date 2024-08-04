@@ -1,3 +1,5 @@
+# 家庭宽带Full Cone NAT网络环境下使用Classicstun协议获取UdpClient的公网IPEndPoint
+
 # 背景
 由于IPv4地址数量稀缺，家庭用户宽带普遍为NAT共享IP地址。这种情况下两台在不同区域的设备无法直接通信，如果数据全部通过服务器的话会造成服务器的负担过大，同时受到服务器带宽限制。  
 因此Classicstun协议诞生。通过Classicstun协议可获取双方的IP地址以及端口号从而实现两台计算机直接通信，不经过服务器。
