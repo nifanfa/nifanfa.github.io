@@ -40,158 +40,133 @@ unsafe struct ClassicstunAttribute
 
 以下是获取当前UDPClient的公网IPEndPoint的函数（仅支持Full Cone NAT）：
 ```cs
+using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
-UdpClient uc = new UdpClient(0, AddressFamily.InterNetwork);
-if (GetNATPublicEndPointIfFullCone(ref uc, out var mapped))
+if (GetFullConeMappedAddress(out var ep))
 {
-    Console.WriteLine($"UdpClient的公网IPEndPoint是：{mapped}");
-}
-else
-{
-    throw new Exception("NAT类型不是Full Cone");
+    Console.WriteLine($"Full cone! {ep}");
 }
 
-unsafe bool GetNATPublicEndPointIfFullCone(ref UdpClient uc, out IPEndPoint mappedAddress)
+bool GetFullConeMappedAddress(out IPEndPoint? result)
 {
-    ushort ntoh(ushort Value)
+    const string stun_server = "stun.miwifi.com";
+    using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
     {
-        return ((ushort)((((Value) & 0xff) << 8) | (((Value) & 0xff00) >> 8)));
-    }
-
-    mappedAddress = new IPEndPoint(IPAddress.None, 0);
-
-    IPEndPoint stun_server = new IPEndPoint(Dns.GetHostEntry("stun.syncthing.net", AddressFamily.InterNetwork).AddressList.First(), 3478);
-
-    Guid requestGUID = Guid.NewGuid();
-    {
-        MemoryStream ms = new MemoryStream();
-        ms.Write(BitConverter.GetBytes((ushort)ntoh(1))); //MessageType
-        ms.Write(BitConverter.GetBytes((ushort)ntoh(0))); //MessageLength
-        ms.Write(requestGUID.ToByteArray());
-        byte[] req = ms.ToArray();
-        uc.Send(req, stun_server);
-        ms.Close();
-    }
-
-    IPEndPoint changedAddress = null;
-    Task<UdpReceiveResult> responseAsync = uc.ReceiveAsync();
-    if (!responseAsync.Wait(1000))
-    {
-        return false;
-    }
-    if (!(responseAsync.Result.RemoteEndPoint.IPEndPointEquals(stun_server))) throw new InvalidOperationException("Packet received from a bad remote end point");
-    byte[] buffer = responseAsync.Result.Buffer;
-    {
-        if (buffer.Length <= (sizeof(ushort) + sizeof(ushort) + sizeof(Guid))) throw new InvalidDataException();
-        MemoryStream ms = new MemoryStream(buffer);
-        ms.Seek(sizeof(ushort) + sizeof(ushort), SeekOrigin.Begin);
-        Guid responseGUID = new Guid(
-                BitConverter.ToUInt32([(byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte()]),
-                BitConverter.ToUInt16([(byte)ms.ReadByte(), (byte)ms.ReadByte()]),
-                BitConverter.ToUInt16([(byte)ms.ReadByte(), (byte)ms.ReadByte()]),
-                (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte()
-            );
-        if (requestGUID != responseGUID) throw new InvalidDataException("Wrong packet");
-        for (; ; )
+        IPEndPoint source_address = new IPEndPoint(Dns.GetHostEntry(stun_server, AddressFamily.InterNetwork).AddressList.First(), 3478);
+        IPEndPoint? changed_address = null;
+        IPEndPoint? mapped_address = null;
+        client.Bind(new IPEndPoint(IPAddress.Any, 0));
         {
-            ushort attr = ntoh(BitConverter.ToUInt16([
-                    (byte)ms.ReadByte(),
-                    (byte)ms.ReadByte(),
-                ]));
-            if (attr == 0xffff) break;
-            ushort length = ntoh(BitConverter.ToUInt16([
-                    (byte)ms.ReadByte(),
-                    (byte)ms.ReadByte(),
-                ]));
-            if (attr == 1)
             {
-                ushort prot_fam = ntoh(BitConverter.ToUInt16([
-                        (byte)ms.ReadByte(),
-                    (byte)ms.ReadByte(),
-                ]));
-                if (prot_fam == 1)
-                {
-                    ushort port = ntoh(BitConverter.ToUInt16([(byte)ms.ReadByte(), (byte)ms.ReadByte()]));
-                    IPAddress ip = new IPAddress([
-                            (byte)ms.ReadByte(),
-                       (byte)ms.ReadByte(),
-                       (byte)ms.ReadByte(),
-                       (byte)ms.ReadByte()
-                        ]);
-                    mappedAddress = new IPEndPoint(ip, port);
-                }
+                MessageHeader request = new MessageHeader();
+                request.Type = BinaryPrimitives.ReverseEndianness(MessageHeader.BINDING_REQUEST);
+                request.Length = 0;
+                request.TransactionID = Guid.NewGuid();
+                client.SendTo(request.ToArray(), source_address);
             }
-            else if (attr == 5)
             {
-                ushort prot_fam = ntoh(BitConverter.ToUInt16([
-                        (byte)ms.ReadByte(),
-                    (byte)ms.ReadByte(),
-                ]));
-                if (prot_fam == 1)
+                byte[] buffer = new byte[1500];
+                var task = client.ReceiveFromAsync(buffer, new IPEndPoint(IPAddress.Any, 0));
+                if (task.Wait(1000))
                 {
-                    ushort port = ntoh(BitConverter.ToUInt16([(byte)ms.ReadByte(), (byte)ms.ReadByte()]));
-                    IPAddress ip = new IPAddress([
-                            (byte)ms.ReadByte(),
-                       (byte)ms.ReadByte(),
-                       (byte)ms.ReadByte(),
-                       (byte)ms.ReadByte()
-                        ]);
-                    changedAddress = new IPEndPoint(ip, port);
+                    MessageHeader response = buffer.ToStructure<MessageHeader>();
+                    ushort pos = (ushort)Marshal.SizeOf<MessageHeader>();
+                    while (pos < BinaryPrimitives.ReverseEndianness(response.Length))
+                    {
+                        MessageAttribute attr = buffer.ToStructure<MessageAttribute>(pos);
+                        switch (BinaryPrimitives.ReverseEndianness(attr.Type))
+                        {
+                            case MessageAttribute.MAPPED_ADDRESS:
+                                mapped_address = new IPEndPoint(new IPAddress(attr.IP), BinaryPrimitives.ReverseEndianness(attr.Port));
+                                break;
+                            case MessageAttribute.CHANGED_ADDRESS:
+                                changed_address = new IPEndPoint(new IPAddress(attr.IP), BinaryPrimitives.ReverseEndianness(attr.Port));
+                                break;
+                        }
+                        pos += sizeof(ushort) * 2;
+                        pos += BinaryPrimitives.ReverseEndianness(attr.Length);
+                    }
                 }
-            }
-            else
-            {
-                ms.Seek(length, SeekOrigin.Current);
+                else
+                {
+                    throw new TimeoutException();
+                }
             }
         }
-    }
-    if (changedAddress == null)
-    {
-        throw new InvalidOperationException("Bad stun server or stun server does not support change address");
-    }
-
-    Guid changeRequestGUID = Guid.NewGuid();
-    {
-        MemoryStream ms = new MemoryStream();
-        ms.Write(BitConverter.GetBytes((ushort)ntoh(1))); //MessageType
-        ms.Write(BitConverter.GetBytes((ushort)ntoh(8))); //MessageLength
-        ms.Write(changeRequestGUID.ToByteArray());
-        ms.Write(new byte[]
+        if (changed_address != null)
         {
-            0x00,0x03,
-            0x00,0x04,
-            0x00,0x00,0x00,0b00000110
-            //ChangeIP   0b00000100
-            //ChangePort 0b00000010
-        });
-        byte[] req = ms.ToArray();
-        uc.Send(req, stun_server);
-        ms.Close();
+            {
+                MessageHeader request = new MessageHeader();
+                request.Type = BinaryPrimitives.ReverseEndianness(MessageHeader.BINDING_REQUEST);
+                request.Length = BinaryPrimitives.ReverseEndianness((ushort)8);
+                request.TransactionID = Guid.NewGuid();
+                MessageAttribute attr = new MessageAttribute();
+                attr.Type = BinaryPrimitives.ReverseEndianness(MessageAttribute.CHANGE_REQUEST);
+                attr.Length = BinaryPrimitives.ReverseEndianness((ushort)4);
+                attr.ChangeRequest = MessageAttribute.ChangeFlags.ChangePort | MessageAttribute.ChangeFlags.ChangeIP;
+                byte[] attrBytes = attr.ToArray();
+                Array.Resize(ref attrBytes, 8);
+                client.SendTo([.. request.ToArray(), .. attrBytes], source_address);
+            }
+            {
+                byte[] buffer = new byte[1500];
+                var task = client.ReceiveFromAsync(buffer, new IPEndPoint(IPAddress.Any, 0));
+                if (task.Wait(1000))
+                {
+                    result = mapped_address;
+                    return task.Result.RemoteEndPoint.Equals(changed_address);
+                }
+                else
+                {
+                    throw new TimeoutException();
+                }
+            }
+        }
+        else throw new InvalidDataException();
     }
+}
 
-    Task<UdpReceiveResult> changeResponseAsync = uc.ReceiveAsync();
-    if (!changeResponseAsync.Wait(1000))
-    {
-        return false;
-    }
-    if (!(changeResponseAsync.Result.RemoteEndPoint.IPEndPointEquals(changedAddress))) throw new InvalidOperationException("Packet received from a bad remote end point");
-    byte[] resp = changeResponseAsync.Result.Buffer;
-    {
-        if (resp.Length <= (sizeof(ushort) + sizeof(ushort) + sizeof(Guid))) throw new InvalidDataException();
-        MemoryStream ms = new MemoryStream(resp);
-        ms.Seek(sizeof(ushort) + sizeof(ushort), SeekOrigin.Begin);
-        Guid changeResponseGUID = new Guid(
-                BitConverter.ToUInt32([(byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte()]),
-                BitConverter.ToUInt16([(byte)ms.ReadByte(), (byte)ms.ReadByte()]),
-                BitConverter.ToUInt16([(byte)ms.ReadByte(), (byte)ms.ReadByte()]),
-                (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte(), (byte)ms.ReadByte()
-            );
-        if (changeRequestGUID != changeResponseGUID) throw new InvalidDataException("Wrong packet");
-    }
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+struct MessageHeader
+{
+    public const ushort BINDING_REQUEST = 0x0001;
+    public const ushort BINDING_RESPONSE = 0x0101;
+    public ushort Type;
+    public ushort Length;
+    public Guid TransactionID;
+}
 
-    return true;
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+public struct MessageAttribute
+{
+    [FieldOffset(0)]
+    public ushort Type;
+    [FieldOffset(2)]
+    public ushort Length;
+
+    public const ushort MAPPED_ADDRESS = 0x0001;
+    public const ushort SOURCE_ADDRESS = 0x0004;
+    public const ushort CHANGED_ADDRESS = 0x0005;
+    [FieldOffset(4)]
+    public ushort ProtocolFamily;
+    [FieldOffset(6)]
+    public ushort Port;
+    [FieldOffset(8)]
+    public uint IP;
+
+    public const ushort CHANGE_REQUEST = 0x0003;
+    [FieldOffset(7)]
+    public ChangeFlags ChangeRequest;
+
+    [Flags]
+    public enum ChangeFlags : byte
+    {
+        ChangeIP = 0b00000100,
+        ChangePort = 0b00000010
+    }
 }
 ```
 2024年7月3日
