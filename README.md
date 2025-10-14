@@ -3,6 +3,7 @@
 
 # 日志
 [家庭宽带Full Cone NAT网络环境下使用Classicstun协议获取UdpClient的公网IPEndPoint](stun/)  
+[我的联系方式](contact/)  
   
 # 个人介绍  
 ## 主要成就
@@ -82,9 +83,6 @@ MOSA 的目标更加远大，至少他们考虑了跨平台。不过，对我来
 此外，我还涉足了底层开发、反编译和逆向工程。我使用过 x64dbg 和 IDA Pro 等工具，
 后来，我又尝试了 ASP.NET 和 SQL Server，对这些技术有了初步的了解。
 
-## 联系方式
-电子邮箱：nifanfa@nifanfa.com  
-QQ：3244735564（大号）  
 2024年7月11日  
   
 蜀ICP备2025152620号-1
