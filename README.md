@@ -1,9 +1,9 @@
 # 这是nifanfa个人的网站
-## 
+
+## [我的联系方式](contact/)  
 
 # 日志
 [家庭宽带Full Cone NAT网络环境下使用Classicstun协议获取UdpClient的公网IPEndPoint](stun/)  
-[我的联系方式](contact/)  
   
 # 个人介绍  
 ## 主要成就
