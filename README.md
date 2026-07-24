@@ -51,10 +51,10 @@ for(;;)
 
 在 MOOS 中，我陆续实现了多线程/多处理器支持、独立啃英文手册编写驱动、重写 C 标准库移植游戏《DOOM》，以及构建完整的网络协议栈（ARP/IP/UDP/TCP/DNS/DHCP）。
 
-最终 MOOS 帮我获得了四川省青少年科技创新一等奖。此后我还涉足了逆向工程（x64dbg、IDA Pro）以及 Web 开发（ASP.NET、SQL Server）。
-
 ![image](images/moos.png)  
 ## 获奖
+最终 MOOS 帮我获得了四川省青少年科技创新一等奖。此后我还涉足了逆向工程（x64dbg、IDA Pro）以及 Web 开发（ASP.NET、SQL Server）。
+
 ![这里站错位置了](images/stage.jpg)
 
 2024年7月11日  
